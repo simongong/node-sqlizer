@@ -5,11 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha test.js",
-    "doc": "./node_modules/.bin/jsdoc2md index.js > api.md"
+    "doc": "jsdoc2md index.js > api.md"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/simongong/node-sqlizer.git"
+    "url": "git+https://github.com/simongong/node-sqlizer.git"
   },
   "keywords": [
     "node-mysql",
@@ -17,7 +17,7 @@
     "sqlizer",
     "query"
   ],
-  "author": "Simon Gong",
+  "author": "simongong",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/simongong/node-sqlizer/issues"

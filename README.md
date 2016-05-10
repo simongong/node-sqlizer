@@ -4,6 +4,8 @@
 
 Node-Sqlizer is a helper to generate complex sql query statement.
 
+Originally inspired by functions in [Toshihiko](https://github.com/XadillaX/Toshihiko).
+
 ## Install
 
 ```
