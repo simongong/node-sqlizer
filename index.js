@@ -1,14 +1,15 @@
-'use strict';
-
 /**
- * sql query generator.
+ * A helper to generate complex sql query statement.
  */
+
+'use strict';
 
 const Util = require('util');
 const Moment = require('moment');
 
 /**
- * @param {object} query A JSON object which supports three types of key:
+ * @description Get full sql statement.
+ * @param {Object} query A JSON object which supports three types of key:
  * table(required), where, limit, orderBy
  * e.g.
  * {
@@ -17,7 +18,7 @@ const Moment = require('moment');
  *   limit: [],
  *   orderBy: []
  * }
- * @param {string} type Type of query: select(by default), count
+ * @param {String} type Type of query: 'select'(by default), 'count'
  * @return {string} sql string
  */
 exports.getSql = (query, type) => {
@@ -55,6 +56,12 @@ exports.getSql = (query, type) => {
   return sql.trim();
 };
 
+/**
+ * @description Get limit clause of a query.
+ * @param  {Number} page number
+ * @param  {Number} size number of items in a page
+ * @return {String} sql clause for 'SQL-Limit'
+ */
 exports.limit = (page, size) => {
   page = parseInt(page, 10) || 1;
   size = parseInt(size, 10) || 10;
@@ -66,6 +73,11 @@ exports.limit = (page, size) => {
   return [(page - 1) * size, size];
 };
 
+/**
+ * @description Get count number of a count query.
+ * @param  {QueryResult} countResult a result of executing a count query.
+ * @return {Number} count number
+ */
 exports.getCount = (countResult) => {
   if (countResult && countResult[0]) {
     return parseInt(countResult[0]['COUNT(0)']);
@@ -74,15 +86,31 @@ exports.getCount = (countResult) => {
 };
 
 /**
- * @description exports sql-where generators for custom defining sql.
- * @param  {Object} where is object to generate 'SQL-Where', @see _makeWhere
- * @return {String} sql snipets for 'SQL-Where'
+ * @description Get where clause of a query.
+ * @param  {Object} where conditions A JSON object which supports three types of key：
+ * 1. field_name, 2. `$and`, 3. `$or`
+ * Supported logical oprator: $eq / ===, $neq / !==, $gt(e) / >(=), $lt(e) / <(=), $like, $in
+ * e.g.
+ * conditions = {
+  key1: 1,
+  key2: {
+    $or: {
+      $neq: 1,
+      $in: [2, 3, 4]
+    }
+  },
+  key3: {
+    $like: 'test'
+  }
+ * }
+ * @return {String} sql clause for 'SQL-Where'
  */
 exports.getWhere = (where) => {
   return _makeWhere(where);
 };
 
 /**
+ * @description Generate a valid datetime string for mysql.
  * @param {DateTime|Date|String} date datetime in mysql or date in js
  * @return {String} formated datetime string
  */
@@ -91,8 +119,9 @@ exports.toDatetimeStr = (date) => {
 };
 
 /**
+ * @description Convert format of keys of an object from snake-case to camel-case.
  * @param {Object|String} data string or keys of object are named in form of snake
- * @param {number} depth to which level of keys should it process
+ * @param {Number} depth to which level of keys should it process
  * @return {Object|String} string or keys of object are named in form of camel case
  */
 exports.snakeToCamel = (data, depth) => {
@@ -107,8 +136,9 @@ exports.snakeToCamel = (data, depth) => {
 };
 
 /**
+ * @description Convert format of keys of an object from camel-case to snake-case.
  * @param {Object|String} data string or keys of object are named in form of camel case
- * @param {number} depth to which level of keys should it process
+ * @param {Number} depth to which level of keys should it process
  * @return {Object|String} string or keys of object are named in form of snake
  */
 exports.camelToSnake = (data, depth) => {
@@ -143,7 +173,6 @@ function _camelize(key) {
 }
 
 // camelize/snakelize keys of an object
-// @param {number} depth to which level of keys should it process
 function _processKeys(obj, processer, depth) {
   if (depth === 0 || !Util.isObject(obj)) {
     return obj;
@@ -159,26 +188,7 @@ function _processKeys(obj, processer, depth) {
   return result;
 }
 
-/**
- * @param {object} conditions A JSON object which supports three types of key：
- * 1. field_name, 2. `$and`, 3. `$or`
- * Supported logical oprator: $eq / ===, $neq / !==, $gt(e) / >(=), $lt(e) / <(=), $like, $in
- * e.g.
- * conditions = {
-  key1: 1,
-  key2: {
-    $or: {
-      $neq: 1,
-      $in: [2, 3, 4]
-    }
-  },
-  key3: {
-    $like: 'test'
-  }
- * }
- * @param {string} type supported logical operator: '$and', '$or', 'field_name'
- * @return {string} where clause
- */
+// supported value of type: '$and', '$or', 'field_name'
 function _makeWhere(conditions, type) {
   let keys = Object.keys(conditions);
   if (keys.length === 0) {
@@ -342,11 +352,6 @@ function _makeConditionField(condition, field, type) {
   return '(' + result + ')';
 }
 
-/**
- * @param {array} conditions An array of integers。e.g. [0, 20]
- * @param {boolean} upperOnly
- * @return {string} limit string. e.g. '10, 20'
- */
 function _makeLimit(conditions, upperOnly) {
   if (!Util.isArray(conditions)) {
     throw new TypeError('Type of limit should be array but got:', conditions);
@@ -382,16 +387,7 @@ function _limitArrayToObject(limitArray) {
   return obj;
 }
 
-/**
- * @param {string | array} conditions a string or an array of string. e.g.
- * 'key1 desc'
- * or
- * [
- *   'key1 asc',
- *   'key2 desc'
- * ]
- * @return {string} order by clause
- */
+// a string or an array of string
 function _makeOrder(conditions) {
   if (!conditions) {
     return '';
@@ -431,10 +427,6 @@ function _escapeValue(value) {
   return value;
 }
 
-/**
- * @param {primitivetype} value raw value
- * @return {primitivetype} quoted value
- */
 function _quotedValue(value) {
   if (Util.isNumber(value) || Util.isBoolean(value)) {
     return value;
