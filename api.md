@@ -1,7 +1,7 @@
 ## Functions
 
 <dl>
-<dt><a href="#getSql">getSql(query, type, fields)</a> ⇒ <code>string</code></dt>
+<dt><a href="#getSql">getSql(query, opt)</a> ⇒ <code>string</code></dt>
 <dd><p>Get full sql statement.</p>
 </dd>
 <dt><a href="#limit">limit(page, size)</a> ⇒ <code>String</code></dt>
@@ -26,7 +26,7 @@
 
 <a name="getSql"></a>
 
-## getSql(query, type, fields) ⇒ <code>string</code>
+## getSql(query, opt) ⇒ <code>string</code>
 Get full sql statement.
 
 **Kind**: global function  
@@ -35,8 +35,7 @@ Get full sql statement.
 | Param | Type | Description |
 | --- | --- | --- |
 | query | <code>Object</code> | A JSON object which supports three types of key: table(required), where, limit, orderBy e.g. {   table: 'table_name',   where: {},   limit: [],   orderBy: [] } |
-| type | <code>String</code> | Type of query: 'select'(by default), 'count' |
-| fields | <code>array</code> | Required fields of a record |
+| opt | <code>Object</code> | setting of query: count, distinct, fields (only one can be set) e.g. {   distincts: ['id', 'type'],   count: false,   fields: ['id', 'type'] } |
 
 <a name="limit"></a>
 

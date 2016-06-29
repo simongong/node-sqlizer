@@ -18,25 +18,41 @@ const Moment = require('moment');
  *   limit: [],
  *   orderBy: []
  * }
- * @param {String} type Type of query: 'select'(by default), 'count'
- * @param {array} fields Required fields of a record
+ * @param {Object} opt setting of query: count, distinct, fields (only one can be set)
+ * e.g.
+ * {
+ *   distincts: ['id', 'type'],
+ *   count: false,
+ *   fields: ['id', 'type']
+ * }
  * @return {string} sql string
  */
-exports.getSql = (query, type, fields) => {
+exports.getSql = (query, opt) => {
   let sql = 'SELECT ';
 
-  if (fields) {
-    if (fields.constructor.name !== 'Array') {
-      throw new TypeError('Sqlizer.getSql()第三个参数必须是数组');
+  if (!opt) {
+    sql += '*';
+  } else {
+    // check opt
+    if (!_limitedValidProp(opt, ['fields', 'count', 'distincts'], 1)) {
+      throw new TypeError('You can ONLY set ONE property of [\'fields\', \'count\', \'distincts\'] in opt!');
     }
 
-    sql += fields.map(v => '`' + v + '`').join(', ');
-  } else {
-    sql += '*';
-  }
+    if (opt.fields) {
+      if (opt.fields.constructor.name !== 'Array') {
+        throw new TypeError('opt.fields MUST be an array!');
+      }
 
-  if (type === 'count') {
-    sql = 'SELECT COUNT(0)';
+      sql += opt.fields.join(',');
+    }
+
+    if (opt.count) {
+      sql += 'COUNT(0)';
+    }
+
+    if (opt.distincts) {
+      sql += 'DISTINCT ' + opt.distincts.join(',');
+    }
   }
 
   if (!query.table) {
@@ -49,8 +65,13 @@ exports.getSql = (query, type, fields) => {
     sql += where ? 'WHERE ' + where + ' ' : '';
   }
 
-  // skip order and limit for count
-  if (type === 'count') {
+  if (query.groupBy) {
+    let group = _makeOrder(query.groupBy);
+    sql += group ? 'GROUP BY ' + group + ' ' : '';
+  }
+
+  // skip order and limit for count query
+  if (opt && opt.count) {
     return sql.trim();
   }
 
@@ -454,4 +475,11 @@ function _escapeLikeValue(value) {
   target = _escapeValue(target);
   target = target.replace(/[\_%]/g, '\\$&');
   return '"%' + target + '%"';
+}
+
+// check if numbers of properties in an object is as limited
+function _limitedValidProp(obj, keys, limit) {
+  keys.forEach((k) => obj[k] && limit--);
+
+  return limit === 0 ? true : false;
 }

@@ -47,8 +47,8 @@ describe('test/service/sqlizer.test.js', function() {
       orderBy: 'key1 DESC',
     };
     let fields = ['id', 'type'];
-    let sqlizedQuery = Sqlizer.getSql(query, null, fields);
-    let expectedQuery = 'SELECT `id`, `type` FROM `test` WHERE (`key1` = "value1" AND ((`key2` != "value2" OR `key2` IN (2, 3, 4))) AND (`key3` LIKE "%test%")) ORDER BY key1 DESC LIMIT 10, 20';
+    let sqlizedQuery = Sqlizer.getSql(query, {fields});
+    let expectedQuery = 'SELECT id,type FROM `test` WHERE (`key1` = "value1" AND ((`key2` != "value2" OR `key2` IN (2, 3, 4))) AND (`key3` LIKE "%test%")) ORDER BY key1 DESC LIMIT 10, 20';
     expect(sqlizedQuery).toEqual(expectedQuery);
   });
 
