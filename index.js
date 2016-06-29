@@ -19,10 +19,21 @@ const Moment = require('moment');
  *   orderBy: []
  * }
  * @param {String} type Type of query: 'select'(by default), 'count'
+ * @param {array} fields Required fields of a record
  * @return {string} sql string
  */
-exports.getSql = (query, type) => {
-  let sql = 'SELECT *';
+exports.getSql = (query, type, fields) => {
+  let sql = 'SELECT ';
+
+  if (fields) {
+    if (fields.constructor.name !== 'Array') {
+      throw new TypeError('Sqlizer.getSql()第三个参数必须是数组');
+    }
+
+    sql += fields.map(v => '`' + v + '`').join(', ');
+  } else {
+    sql += '*';
+  }
 
   if (type === 'count') {
     sql = 'SELECT COUNT(0)';
