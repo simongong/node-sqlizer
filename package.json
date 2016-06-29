@@ -1,6 +1,6 @@
 {
   "name": "node-sqlizer",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A sql helper to generate complex sql query.",
   "main": "index.js",
   "scripts": {
